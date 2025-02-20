@@ -6,7 +6,7 @@
 | linepx    | For training straight line pixel detector. |
 | wireframe.py | Generate line segments/wireframe from predicted junctions and line pixels. |
 | evaluation | Evaluation of junctions and wireframes. |
-
+测试
 ## Requirements
 - python3
 - pytorch==0.3.1
@@ -122,3 +122,42 @@ year = {2018}
 
 ## License
 You can use this code/dataset for your research and other usages, following MIT License.
+
+
+
+
+- `--create_dataset`: 创建数据集。
+- `--json`: 从文件加载架构参数。
+- `--balance`: 平衡正负样本的比例。
+- `--ratio`: 正负样本的比例，默认为7。
+- `--trainer`: 指定训练器名称，默认为`balance_junction`。
+- `--criterion`: 指定损失函数名称，默认为`balance`。
+- `--decoder`: 指定解码器名称，默认为`junction`。
+- `--split`: 指定数据集划分，默认为`train`。
+- `-e`, `--exp`: 实验名称，默认为`1`。
+- `--net`: 指定特征网络，默认为`inception`。
+- `--test`: 是否进行测试。
+- `--image_size`: 输入图像尺寸，默认为480。
+- `--grid_size`: 输出尺寸，默认为60。
+- `--focus_size`: 每个网格单元覆盖的范围，默认为1.5。
+- `--num_bin`: 0到360的分箱数量，默认为15。
+- `--max_len`: 每个单元格的最大连接数，默认为1。
+- `--loss_weights`: 连接和分箱损失的权重，默认为`1.0, 0.1, 1.0, 0.1`。
+- `--decodeFeats`: 解码器网络的通道数，默认为256。
+- `--valIntervals`: 验证间隔，默认为5。
+- `--gpu`: 指定使用的GPU设备，默认为`0`。
+- `--epochs`: 训练的轮数，默认为17。
+- `--save_dir`: 保存模型的目录，默认为`output`。
+- `--num_workers`: 加载数据的工作线程数，默认为1。
+- `--batch_size`, `-b`: 批处理大小，默认为1。
+- `-o`, `--optimizer`: 训练优化器，默认为`sgd`。
+- `--lr`: 初始学习率，默认为0.01。
+- `--lr_steps`: 学习率调整的步数，默认为`8,12,16`。
+- `--lr_decay_step`: 学习率衰减的步数，默认为5。
+- `--lr_decay_gamma`: 学习率衰减比率，默认为0.1。
+- `--clip_norm`: 优化时的梯度裁剪阈值，默认为1.0。
+- `-r`, `--resume`: 是否恢复检查点，默认为False。
+- `--checksession`: 加载模型的会话，默认为1。
+- `--checkepoch`: 加载模型的轮数，默认为16。
+- `--checkdir`: 保存检查点的路径，默认为空字符串。
+- `--checkpoint`: 加载模型的检查点，默认为0。

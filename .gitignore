@@ -14,3 +14,6 @@ data/*
 reference/*
 final
 final/*
+/output/
+/result/
+/logs/
