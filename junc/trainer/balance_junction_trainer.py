@@ -66,6 +66,9 @@ class Trainer():
 
         self.log_interval = 100
         self.logfile = ref.logdir / "{}.log".format(self.opt.exp)
+        if not os.path.exists(self.logfile):
+            with open(self.logfile, 'w') as file:
+                pass
         with open(self.logfile, 'a') as fn:
             fn.write('\n{}\n'.format(datetime.datetime.now()))
 

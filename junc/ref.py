@@ -26,10 +26,10 @@ root_dir = Path(os.getcwd()) / '..'
 # logdir = root_dir / 'logs'
 
 #修改后的代码
-ssh_data_dir=Path(os.getcwd()) / '..'/'..'/'..'
-data_root = ssh_data_dir / 'data'
+ssh_dir=Path(os.getcwd()) / '..'/'..'/'..'
+data_root = ssh_dir / 'data'
 junc_data_root = data_root / 'junc'
-output_root = ssh_data_dir / "output/"
-result_dir = ssh_data_dir / 'result' / 'junc'
+output_root = ssh_dir / "output/"
+result_dir = ssh_dir / 'result' / 'junc'
 hypeDir = root_dir / 'junc/hypes'
-logdir = ssh_data_dir / 'logs'
+logdir = ssh_dir / 'logs'
