@@ -125,8 +125,9 @@ class stackHourglassTrainer():
                 os.makedirs(outDir)
 
             for j in range(len(imgids)):
-                np.save(os.path.join(outDir, imgids[j] + '_line.npy'), valLoader.dataset.postprocessLine()(line_result.cpu().data[j].numpy()))
-
+                # np.save(os.path.join(outDir, imgids[j] + '_line.npy'), valLoader.dataset.postprocessLine()(line_result.cpu().data[j].numpy()))
+                processed_line = valLoader.dataset.postprocessLine()(line_result.cpu().data[j])
+                np.save(os.path.join(outDir, imgids[j] + '_line.npy'), processed_line.numpy())
         log = '\n * Finished testing epoch # %d      Loss: %1.4f\n' % (epoch, avgLoss)
         self.logger['val'].write(log)
         print(log)

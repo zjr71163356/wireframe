@@ -1,74 +1,68 @@
-from torch.utils.data.dataset import *
 import torch
+from torch.utils.data import Dataset
 import os
+from torchvision import transforms
+from PIL import Image
 import numpy as np
-import cv2
-import datasets.transforms as t
-import pickle
+from typing import Any, Dict, Tuple
 
-class indoorDist(Dataset):
-    def __init__(self, imageInfo, opt, split):
+
+class IndoorDist(Dataset):
+    def __init__(self, imageInfo: Dict[str, Any], opt: Any, split: str) -> None:
         self.imageInfo = imageInfo[split]
         self.opt = opt
         self.split = split
         self.dir = imageInfo['basedir']
 
-    def __getitem__(self, index):
-        imgPath = self.imageInfo['imagePath'][index]
-        imgPath = str(imgPath)
-        image = cv2.imread(imgPath)
-        image = image / 255.
+        self.preprocess = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
+
+        self.preprocessLine = transforms.Compose([
+            transforms.ToTensor(),
+        ])
+
+        # Precompute the mean and std tensor for use later
+        self.mean = torch.tensor([0.485, 0.456, 0.406], device=torch.device('cpu')).view(3, 1, 1)
+        self.std = torch.tensor([0.229, 0.224, 0.225], device=torch.device('cpu')).view(3, 1, 1)
+
+    def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor, str]:
+        imgPath = str(self.imageInfo['imagePath'][index])
+        image = Image.open(imgPath).convert('RGB')
         image = self.preprocess(image)
 
-        linePath = self.imageInfo['linePath'][index]
-        linePath = str(linePath)
-        line = cv2.imread(linePath, 0)
+        linePath = str(self.imageInfo['linePath'][index])
+        line = Image.open(linePath).convert('L')
         line = self.preprocessLine(line)
 
-        image = torch.from_numpy(image).float()
-        line = torch.from_numpy(line).float()
+        # Use torch's `interpolate` more efficiently with pre-calculated device tensors
+        line = torch.nn.functional.interpolate(line.unsqueeze(0), size=(self.opt.imgDim, self.opt.imgDim),
+                                               mode='bilinear', align_corners=False).squeeze(0)
 
-        # if self.opt.testOnly:
-        #     imgName = imgPath.split('/')[-1].replace('_rgb.png', '')
-        #     return image, line, imgName
-        # else:
-        #     return image, line
-        imgName = imgPath.split('/')[-1].replace('_rgb.png', '')
+        imgName = os.path.basename(imgPath).replace('_rgb.png', '')
         return image, line, imgName
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.imageInfo['imagePath'])
 
-    def preprocess(self, im):
-        mean = torch.Tensor([0.485, 0.456, 0.406])
-        std = torch.Tensor([0.229, 0.224, 0.225])
-        im = np.asarray(im)
-        im = t.normalize(im, mean, std)
-        im = np.transpose(im, (2, 0, 1))
-        return im
-
-    def preprocessLine(self, line):
-        line = np.asarray(line)
-        tmp = np.zeros((1, self.opt.imgDim, self.opt.imgDim))
-        tmp[0, :, :] = line
-        line = tmp
-        return line
-
-    def postprocess(self):
-        def process(im):
-            mean = torch.Tensor([0.485, 0.456, 0.406])
-            std = torch.Tensor([0.229, 0.224, 0.225])
-            im = np.transpose(im, (1, 2, 0))
-            im = t.unNormalize(im, mean, std)
+    def postprocess(self) -> Any:
+        def process(im: torch.Tensor) -> torch.Tensor:
+            im = im * self.std + self.mean
+            im = im.permute(1, 2, 0)  # Tensor operation
             return im
+
         return process
 
-    def postprocessLine(self):
-        def process(im):
-            im = np.transpose(im, (1, 2, 0))
+    def postprocessLine(self) -> Any:
+        def process(im: torch.Tensor) -> torch.Tensor:
+            if isinstance(im, np.ndarray):  # Compatibility check
+                im = torch.from_numpy(im)
+            im = im.permute(1, 2, 0)  # Tensor operation
             return im
+
         return process
 
-def getInstance(info, opt, split):
-    myInstance = indoorDist(info, opt, split)
-    return myInstance
+
+def getInstance(info: Dict[str, Any], opt: Any, split: str) -> IndoorDist:
+    return IndoorDist(info, opt, split)

@@ -1,72 +1,75 @@
 import math
-import numpy as np
-import torch
 import random
+import torch
+import torch.nn.functional as F
+from torch import Tensor
 
-# ipt is nparray with dimension (height, width, channel)
-# xml is nparray with dimension (height, width)
 
-def addNoise(ipt, miu, std):
-    noise = np.random.normal(miu, std, ipt.shape)
-    noise = np.float32(noise)
+# ipt is a tensor with shape (channel, height, width)
+# xml is a tensor with shape (height, width)
+
+def addNoise(ipt: Tensor, miu: float, std: float) -> Tensor:
+    noise = torch.normal(miu, std, ipt.shape)
     return ipt + noise
 
 
-def thAddNoise(ipt, miu, std):
-    noise = np.random.normal(miu, std, ipt.size())
-    noise = torch.from_numpy(np.float32(noise))
-    return ipt + noise
+def scaleRGB(ipt: Tensor) -> Tensor:
+    return ipt / 255.0
 
-def scaleRGB(ipt):
-    return np.float32(ipt/255)
 
-def unScaleRGB(ipt):
-    opt = ipt*255
-    opt = opt.astype(np.uint8)
+def unScaleRGB(ipt: Tensor) -> Tensor:
+    opt = ipt * 255
+    opt = opt.to(torch.uint8)
     return opt
 
-def normalize(ipt, mean, std):
-    # Convert ipt to torch.Tensor if it is a numpy array
-    if isinstance(ipt, np.ndarray):
-        ipt = torch.from_numpy(ipt).float()
-    
+
+def normalize(ipt: Tensor, mean: list[float], std: list[float]) -> Tensor:
+    # Ensure mean and std are tensors with the same device as ipt
+    mean = torch.tensor(mean, device=ipt.device).view(-1, 1, 1)
+    std = torch.tensor(std, device=ipt.device).view(-1, 1, 1)
+
     # Normalize each channel
-    for i in range(3):  # Assuming 3 channels (RGB)
-        ipt[:, :, i] = (ipt[:, :, i] - mean[i]) / std[i]
-    
-    # Convert the result back to numpy.ndarray
-    if isinstance(ipt, torch.Tensor):
-        ipt = ipt.numpy()
-    
-    return ipt
-def unNormalize(ipt, mean, std):
-    ipt[:][:][0] = (ipt[:][:][0] * std[0]) + mean[0]
-    ipt[:][:][1] = (ipt[:][:][1] * std[1]) + mean[1]
-    ipt[:][:][2] = (ipt[:][:][2] * std[2]) + mean[2]
+    ipt = (ipt - mean) / std
     return ipt
 
-def randomFlip(ipt, xml):
+
+def unNormalize(ipt: Tensor, mean: list[float], std: list[float]) -> Tensor:
+    # Ensure mean and std are tensors with the same device as ipt
+    mean = torch.tensor(mean, device=ipt.device).view(-1, 1, 1)
+    std = torch.tensor(std, device=ipt.device).view(-1, 1, 1)
+
+    # Unnormalize each channel
+    ipt = ipt * std + mean
+    return ipt
+
+
+def randomFlip(ipt: Tensor, xml: Tensor) -> tuple[Tensor, Tensor]:
     if random.uniform(0, 1) > 0.5:
-        ipt = np.fliplr(ipt).copy()
-        xml = np.fliplr(xml).copy()
+        ipt = torch.flip(ipt, dims=[2])  # Flip along the width dimension
+        xml = torch.flip(xml, dims=[1])  # Flip along the width dimension
     return ipt, xml
 
-def randomCrop(ipt, xml, size):
-    origH = ipt.shape[0]
-    origW = ipt.shape[1]
+
+def randomCrop(ipt: Tensor, xml: Tensor, size: tuple[int, int]) -> tuple[Tensor, Tensor]:
+    origH = ipt.shape[1]
+    origW = ipt.shape[2]
     newH = size[0]
     newW = size[1]
+
+    # Randomly select the starting point
     startH = random.randint(0, origH - newH)
     startW = random.randint(0, origW - newW)
-    ipt = ipt[startH : startH+newH, startW : startW+newW, :]
-    xml = xml[startH : startH+newH, startW : startW+newW]
+
+    # Crop the image and XML
+    ipt = ipt[:, startH: startH + newH, startW: startW + newW]
+    xml = xml[startH: startH + newH, startW: startW + newW]
+
     return ipt, xml
 
-def randomSizeCrop(ipt, xml, LowBound):
-    newH = math.floor(random.uniform(LowBound, 1)*ipt.shape[0])
-    while newH%8 != 0:
-        newH -= 1
-    newW = math.floor(random.uniform(LowBound, 1)*ipt.shape[1])
-    while newW%8 != 0:
-        newW -= 1
+
+def randomSizeCrop(ipt: Tensor, xml: Tensor, LowBound: float) -> tuple[Tensor, Tensor]:
+    newH = math.floor(random.uniform(LowBound, 1) * ipt.shape[1])
+    newH = newH - (newH % 8)  # Ensure divisible by 8
+    newW = math.floor(random.uniform(LowBound, 1) * ipt.shape[2])
+    newW = newW - (newW % 8)  # Ensure divisible by 8
     return randomCrop(ipt, xml, (newH, newW))
