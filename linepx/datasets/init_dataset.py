@@ -16,7 +16,7 @@ def create(opt, split):
 
 
 def exec(opt, cacheFile):
-    assert os.path.exists(opt.data), 'Data directory not found: ' + opt.data
+    assert os.path.exists(str(opt.data)), f'Data directory not found: {opt.data}'
 
     print("=> Generating list of data")
 
