@@ -1,4 +1,4 @@
-name: base
+name: ssh_4090_wireframe
 channels:
   - defaults
 dependencies:
