@@ -49,7 +49,7 @@ class IndoorDist(Dataset):
     def postprocess(self) -> Any:
         def process(im: torch.Tensor) -> torch.Tensor:
             im = im * self.std + self.mean
-            im = im.permute(1, 2, 0)  # Tensor operation
+            im = im.permute(1, 2, 0).cpu()  # Keep as tensor
             return im
 
         return process
@@ -58,7 +58,7 @@ class IndoorDist(Dataset):
         def process(im: torch.Tensor) -> torch.Tensor:
             if isinstance(im, np.ndarray):  # Compatibility check
                 im = torch.from_numpy(im)
-            im = im.permute(1, 2, 0)  # Tensor operation
+            im = im.permute(1, 2, 0).cpu()  # Keep as tensor
             return im
 
         return process
