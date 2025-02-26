@@ -144,9 +144,9 @@ class stackHourglassTrainer():
         outputImgs = []
         for i in range(len(visImg) // 3):
             for j in range(self.opt.batchSize):
-                outputImgs.append(postprocess()(visImg[3 * i][j].numpy()))
-                outputImgs.append(postprocessLine()(visImg[3 * i + 1][j].numpy()))
-                outputImgs.append(postprocessLine()(visImg[3 * i + 2][j].numpy()))
+                outputImgs.append(postprocess()(visImg[3 * i][j]))
+                outputImgs.append(postprocessLine()(visImg[3 * i + 1][j]))
+                outputImgs.append(postprocessLine()(visImg[3 * i + 2][j]))
         vis.writeImgHTML(outputImgs, epoch, split, 3, self.opt)
 
     def visJunc(self, img, junc, opt):
