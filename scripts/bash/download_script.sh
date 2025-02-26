@@ -1,5 +1,5 @@
 #!/bin/bash
-#chmod +x install_progressbar.sh
+#chmod +x download_script.sh 
 # 检查是否已安装pip
 if ! command -v pip &> /dev/null
 then

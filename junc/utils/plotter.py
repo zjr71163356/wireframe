@@ -105,8 +105,8 @@ class Plotter(object):
             sw = float(origin_w)/float(w)
             sh = float(origin_h)/float(h)
             junctions = [(sw * x, sh * y) for x, y in junctions]
-            nthetas = resize_theta(nthetas, [sw, sh])        
-            nimage = cv2.resize(nimage, (origin_w, origin_h))
+            nthetas = resize_theta(nthetas, [sw, sh])
+            nimage = cv2.resize(nimage, (int(origin_w), int(origin_h)))
             w, h = origin_w, origin_h
         if not plot_:
             return nimage, junctions, nthetas, nconfs
