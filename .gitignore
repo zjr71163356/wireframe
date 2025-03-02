@@ -19,3 +19,4 @@ final/*
 /logs/
 /.idea
 
+!/data/v1.1/*.txt

@@ -100,7 +100,7 @@ def parse():
         os.environ["CUDA_VISIBLE_DEVICES"] = opt.GPUs
         cudnn.benchmark = True
 
-    torch.set_default_tensor_type('torch.FloatTensor')
+    torch.set_default_dtype(torch.float32)
 
     random.seed(opt.manualSeed)
     torch.manual_seed(opt.manualSeed)

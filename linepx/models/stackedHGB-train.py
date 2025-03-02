@@ -147,9 +147,22 @@ class stackHourglassTrainer():
         outputImgs = []
         for i in range(len(visImg) // 3):
             for j in range(self.opt.batchSize):
-                outputImgs.append(postprocess(visImg[3 * i][j]))
-                outputImgs.append(postprocessLine(visImg[3 * i + 1][j]))
-                outputImgs.append(postprocessLine(visImg[3 * i + 2][j]))
+                # 显式转换为8位格式
+                img1 = postprocess(visImg[3 * i][j])
+                img2 = postprocessLine(visImg[3 * i + 1][j])
+                img3 = postprocessLine(visImg[3 * i + 2][j])
+                
+                # 确保图像是8位格式
+                if img1.dtype != np.uint8:
+                    img1 = np.clip(img1 * 255, 0, 255).astype(np.uint8)
+                if img2.dtype != np.uint8:
+                    img2 = np.clip(img2 * 255, 0, 255).astype(np.uint8)
+                if img3.dtype != np.uint8:
+                    img3 = np.clip(img3 * 255, 0, 255).astype(np.uint8)
+                    
+                outputImgs.append(img1)
+                outputImgs.append(img2)
+                outputImgs.append(img3)
         vis.writeImgHTML(outputImgs, epoch, split, 3, self.opt)
 
     def visJunc(self, img, junc, opt):
