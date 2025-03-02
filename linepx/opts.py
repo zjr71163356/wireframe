@@ -21,7 +21,7 @@ def parse():
                         help='cudnn setting', choices=['fastest', 'deterministic', ' default'])
     # Path options
     parser.add_argument('--dataset', default='indoor', dest='dataset', type=str, help='dataset name')
-    parser.add_argument('--resume',           default='..../result/linepx/',
+    parser.add_argument('--resume',             default='../result/linepx/',
                         type=str,        help='Path to checkpoint and path to test result')
     # Data options
     parser.add_argument('--nThreads',         default=8,

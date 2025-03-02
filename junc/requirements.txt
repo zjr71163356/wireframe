@@ -2,8 +2,9 @@ tqdm
 joblib
 scipy
 numpy
-opencv
+opencv-python
 dominate
 easydict
 plotly
 progress
+progressbar

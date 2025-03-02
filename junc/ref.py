@@ -18,18 +18,18 @@ ext = '.pickle'
 
 root_dir = Path(os.getcwd()) / '..'
 #原来的代码
-# data_root = root_dir / 'data'
-# junc_data_root = data_root / 'junc'
-# output_root = root_dir / "output/"
-# result_dir = root_dir / 'result' / 'junc'
-# hypeDir = root_dir / 'junc/hypes'
-# logdir = root_dir / 'logs'
+data_root = root_dir / 'data'
+junc_data_root = data_root / 'junc'
+output_root = root_dir / "output/"
+result_dir = root_dir / 'result' / 'junc'
+hypeDir = root_dir / 'junc/hypes'
+logdir = root_dir / 'logs'
 
 #修改后的代码
-ssh_dir=Path(os.getcwd()) / '..'/'..'/'..'
-data_root = ssh_dir / 'data'
-junc_data_root = data_root / 'junc'
-output_root = ssh_dir / "output/"
-result_dir = ssh_dir / 'result' / 'junc'
-hypeDir = root_dir / 'junc/hypes'
-logdir = ssh_dir / 'logs'
+# ssh_dir=Path(os.getcwd()) / '..'/'..'/'..'
+# data_root = ssh_dir / 'data'
+# junc_data_root = data_root / 'junc'
+# output_root = ssh_dir / "output/"
+# result_dir = ssh_dir / 'result' / 'junc'
+# hypeDir = root_dir / 'junc/hypes'
+# logdir = ssh_dir / 'logs'

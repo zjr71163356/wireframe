@@ -21,7 +21,7 @@ class stackHourglassTrainer():
 
         if self.optimState is not None:
             self.optimizer.load_state_dict(self.optimState)
-        
+
         train_log_dir = os.path.dirname(os.path.join(opt.resume, 'train.log'))
         if not os.path.exists(train_log_dir):
             os.makedirs(train_log_dir)
@@ -125,9 +125,12 @@ class stackHourglassTrainer():
                 os.makedirs(outDir)
 
             for j in range(len(imgids)):
-                # np.save(os.path.join(outDir, imgids[j] + '_line.npy'), valLoader.dataset.postprocessLine()(line_result.cpu().data[j].numpy()))
-                processed_line = valLoader.dataset.postprocessLine()(line_result.cpu().data[j])
-                np.save(os.path.join(outDir, imgids[j] + '_line.npy'), processed_line.numpy())
+                # Get the tensor part and don't convert it to numpy
+                line_result_part = line_result.cpu().data[j]
+                # Call the postprocessLine with tensor directly
+                line_np = valLoader.dataset.postprocessLine(line_result_part)
+                np.save(os.path.join(outDir, imgids[j] + '_line.npy'), line_np)
+
         log = '\n * Finished testing epoch # %d      Loss: %1.4f\n' % (epoch, avgLoss)
         self.logger['val'].write(log)
         print(log)
@@ -144,9 +147,9 @@ class stackHourglassTrainer():
         outputImgs = []
         for i in range(len(visImg) // 3):
             for j in range(self.opt.batchSize):
-                outputImgs.append(postprocess()(visImg[3 * i][j]))
-                outputImgs.append(postprocessLine()(visImg[3 * i + 1][j]))
-                outputImgs.append(postprocessLine()(visImg[3 * i + 2][j]))
+                outputImgs.append(postprocess(visImg[3 * i][j]))
+                outputImgs.append(postprocessLine(visImg[3 * i + 1][j]))
+                outputImgs.append(postprocessLine(visImg[3 * i + 2][j]))
         vis.writeImgHTML(outputImgs, epoch, split, 3, self.opt)
 
     def visJunc(self, img, junc, opt):

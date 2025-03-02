@@ -1,4 +1,4 @@
-name: ssh_4090_wireframe
+name: wireframe_torch1_4090
 channels:
   - defaults
 dependencies:

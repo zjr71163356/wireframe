@@ -22,25 +22,24 @@ def unScaleRGB(ipt: Tensor) -> Tensor:
     opt = opt.to(torch.uint8)
     return opt
 
-
 def normalize(ipt: Tensor, mean: list[float], std: list[float]) -> Tensor:
-    # Ensure mean and std are tensors with the same device as ipt
+    # 确保 mean 和 std 是与 ipt 相同设备上的张量
     mean = torch.tensor(mean, device=ipt.device).view(-1, 1, 1)
     std = torch.tensor(std, device=ipt.device).view(-1, 1, 1)
 
-    # Normalize each channel
+    # 归一化每个通道
     ipt = (ipt - mean) / std
     return ipt
 
-
 def unNormalize(ipt: Tensor, mean: list[float], std: list[float]) -> Tensor:
-    # Ensure mean and std are tensors with the same device as ipt
+    # 确保 mean 和 std 是与 ipt 相同设备上的张量
     mean = torch.tensor(mean, device=ipt.device).view(-1, 1, 1)
     std = torch.tensor(std, device=ipt.device).view(-1, 1, 1)
 
-    # Unnormalize each channel
+    # 反归一化每个通道
     ipt = ipt * std + mean
     return ipt
+
 
 
 def randomFlip(ipt: Tensor, xml: Tensor) -> tuple[Tensor, Tensor]:

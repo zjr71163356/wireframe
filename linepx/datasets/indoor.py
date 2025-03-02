@@ -46,23 +46,38 @@ class IndoorDist(Dataset):
     def __len__(self) -> int:
         return len(self.imageInfo['imagePath'])
 
-    def postprocess(self) -> Any:
-        def process(im: torch.Tensor) -> torch.Tensor:
-            im = im * self.std + self.mean
-            im = im.permute(1, 2, 0).cpu()  # Keep as tensor
-            return im
+    def postprocess(self, tensor: torch.Tensor) -> np.ndarray:
+        """
+        将图像张量转换为适合 OpenCV 的 NumPy 数组。
 
-        return process
+        参数:
+        - tensor: PyTorch 张量，形状为 [C, H, W]。
 
-    def postprocessLine(self) -> Any:
-        def process(im: torch.Tensor) -> torch.Tensor:
-            if isinstance(im, np.ndarray):  # Compatibility check
-                im = torch.from_numpy(im)
-            im = im.permute(1, 2, 0).cpu()  # Keep as tensor
-            return im
+        返回:
+        - img: NumPy 数组，类型为 uint8，形状为 [H, W, C]。
+        """
+        tensor = tensor.detach().cpu()
+        img = tensor.numpy().transpose(1, 2, 0)  # [C, H, W] -> [H, W, C]
+        img = (img * self.std.numpy().transpose(1, 2, 0) + self.mean.numpy().transpose(1, 2, 0)) * 255
+        img = np.clip(img, 0, 255).astype(np.uint8)
+        return img
 
-        return process
+    def postprocessLine(self, tensor: torch.Tensor) -> np.ndarray:
+        """
+        将线条张量转换为适合 OpenCV 的 NumPy 数组。
 
+        参数:
+        - tensor: PyTorch 张量，形状可能为 [1, H, W] 或 [H, W]。
+
+        返回:
+        - line_img: NumPy 数组，类型为 uint8，形状为 [H, W]。
+        """
+        tensor = tensor.detach().cpu()
+        line_img = tensor.numpy()
+        if line_img.ndim == 3 and line_img.shape[0] == 1:
+            line_img = line_img.squeeze(0)  # [1, H, W] -> [H, W]
+        line_img = (line_img * 255).astype(np.uint8)
+        return line_img
 
 def getInstance(info: Dict[str, Any], opt: Any, split: str) -> IndoorDist:
     return IndoorDist(info, opt, split)
