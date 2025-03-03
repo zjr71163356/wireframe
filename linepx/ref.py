@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-root_dir = Path(os.getcwd()) / '..'
+root_dir = Path(__file__).resolve().parents[1]
 # root_dir = Path(os.getcwd())
 data_root = root_dir / 'data'
 

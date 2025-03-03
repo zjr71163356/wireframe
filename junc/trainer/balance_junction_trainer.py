@@ -81,7 +81,7 @@ class Trainer():
                self.step(epoch, val_loader, is_val=True, split='val')
 
     def test(self, dataLoader, epoch, model_path):
-        self.model = torch.load(model_path)
+        self.model = torch.load(model_path,weights_only=False)
         self.model.eval()
             
         test_res_dir = ref.result_dir / self.opt.exp / str(epoch)
