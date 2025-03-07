@@ -102,7 +102,7 @@ def init_folder(opt):
 
 def main():
     opt = opts().parse();  H = opt.hype
-    if check_dataset(opt, 'train'):
+    if check_dataset(opt, 'test'):
         return
     init_folder(opt)
     
