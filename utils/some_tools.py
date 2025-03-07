@@ -135,7 +135,7 @@ def json_to_pkl(json_path, output_dir=None, img_dir=None):
     import numpy as np
     import cv2
     import math
-    
+    json_path=img_dir+'/'+json_path
     # 确定输出目录
     if output_dir is None:
         output_dir = os.path.dirname(json_path)
@@ -146,7 +146,7 @@ def json_to_pkl(json_path, output_dir=None, img_dir=None):
         img_dir = os.path.dirname(json_path)
     
     # 读取JSON文件
-    with open(json_path, 'r') as f:
+    with open(json_path, 'r',encoding='utf-8') as f:
         data = json.load(f)
     
     # 获取图像名称和路径
@@ -176,21 +176,20 @@ def json_to_pkl(json_path, output_dir=None, img_dir=None):
                     points.append(point)
     
     # 构建线集合（每条线由其两个端点的索引表示）
-    lines = []
-    for i in range(len(points)):
-        lines.append([i, (i + 1) % len(points)])
+    lines = [[0,1],[0,3],[1,2],[2,3]]
+
     
     # 构建pointlines（每个点关联的线集合）
     pointlines = [ 
-    [points[0],[0,1],[0,3]],
-    [points[1],[1,2],[1,0]],
-    [points[2],[2,3],[2,1]],
-    [points[3],[3,0],[3,2]]
+    [points[0],[[0,1],[0,3]]],
+    [points[1],[[1,2],[0,1]]],
+    [points[2],[[2,3],[1,2]]],
+    [points[3],[[0,3],[2,3]]]
     ]
  
     
     # 构建pointlines_index
-    pointlines_index = [[lines.index(l1),lines.index(l2)] for (p,l1,l2) in pointlines]
+    pointlines_index = [[lines.index(l1),lines.index(l2)] for (p,(l1,l2)) in pointlines]
     
     # 计算junction（交点位置，即points）
     junction = points.copy()
@@ -199,8 +198,8 @@ def json_to_pkl(json_path, output_dir=None, img_dir=None):
     theta = []
     for i, point in enumerate(points):
         angles = []
-        for line_idx in pointlines[i]:
-            p1, p2 = lines[line_idx]
+        for line in pointlines[i][1]:
+            p1, p2 = line
             other_point_idx = p2 if p1 == i else p1
             other_point = points[other_point_idx]
             
@@ -234,15 +233,12 @@ def json_to_pkl(json_path, output_dir=None, img_dir=None):
     return pkl_path
 
 # ...existing code...
-def get_filelist(dir='test',data_root='data'):
+def get_image_filelist(dir='test',data_root='data'):
     # 定义测试目录路径
     # 如果test目录不在当前工作目录，请提供绝对路径，例如 '/path/to/test'
 
     # 定义想要包含的图片文件扩展名（可以根据需要添加更多）
     image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.svg'}
-
-    # 输出的文本文件名
-    output_file = os.path.join(dir+'_new.txt')
 
     try:
         # 获取test目录中的所有文件
@@ -261,23 +257,62 @@ def get_filelist(dir='test',data_root='data'):
 
     # 可选：按文件名排序
     image_files.sort()
+    return image_files
 
     # 将文件名写入文本文件
+
+def filelist_to_outpath(image_files,output_file):
     with open(output_file, 'w', encoding='utf-8') as f:
         for file in image_files:
             f.write(f"{file}\n")
-
     print(f"已将 {len(image_files)} 个图片文件名写入 '{output_file}'。")
 
+def get_json_filelist(dir_path):
+    """
+    获取指定目录下的所有.json文件
+    
+    Args:
+        dir_path (str): 目录路径
+    
+    Returns:
+        list: .json文件名列表
+    """
+    try:
+        # 获取目录中的所有文件
+        all_files = os.listdir(dir_path)
+    except FileNotFoundError:
+        print(f"目录 '{dir_path}' 不存在。请检查路径是否正确。")
+        return []
+    except PermissionError:
+        print(f"没有权限访问目录 '{dir_path}'。")
+        return []
+        
+    # 过滤出.json文件
+    json_files = [file for file in all_files 
+                    if os.path.isfile(os.path.join(dir_path, file)) and 
+                    file.lower().endswith('.json')]
+    
+    # 按文件名排序
+    json_files.sort()
+    
+    print(f"找到 {len(json_files)} 个JSON文件。")
+    return json_files
+
+def filelist_to_picklelist(dir,output_dir,img_dir):
+    filelist=get_json_filelist(dir)
+    for file in filelist:
+        json_to_pkl(file,output_dir,img_dir)
+        
 if __name__=='__main__':
     # print("this is sometools")
     # get_filelist('/home/tyrfly1001/wireframe/data/v1.1/test')
-    import sys
-    if len(sys.argv) > 1:
-        pickle_path = sys.argv[1]
-        load_pickle(pickle_path)
-        visualize_pointlines(pickle_path)
-    else:
-        print("请提供pickle文件路径")
+    # import sys
+    # if len(sys.argv) > 1:
+    #     pickle_path = sys.argv[1]
+    #     load_pickle(pickle_path)
+    #     visualize_pointlines(pickle_path)
+    # else:
+    #     print("请提供pickle文件路径")
     
+    filelist_to_picklelist('/home/tyrfly1001/wireframe/data/v1.1/test','/home/tyrfly1001/wireframe/data/v1.1/test/processed','/home/tyrfly1001/wireframe/data/v1.1/test')
     
